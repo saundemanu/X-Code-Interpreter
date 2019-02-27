@@ -1,6 +1,7 @@
 package interpreter;
 
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class RunTimeStack {
@@ -15,5 +16,16 @@ public class RunTimeStack {
         // point of our language, so its frame pointer is 0.
         framePointer.add(0);
     }
-    
+
+    public int askStackPop() throws Exception{
+        if(runTimeStack.size() <= 1)
+    return runTimeStack.remove(runTimeStack.size()-1);
+        else throw new EmptyStackException();
+    }
+
+    public void askPush(int newArg){
+         runTimeStack.add(newArg);
+    }
+
+
 }
