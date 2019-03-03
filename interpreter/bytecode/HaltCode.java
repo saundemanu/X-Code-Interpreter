@@ -1,16 +1,15 @@
 package interpreter.bytecode;
 
 
+import interpreter.VirtualMachine;
+
 public class HaltCode extends ByteCode{
 
 
-    public HaltCode(){
-
-    }
 
     @Override
-    public void execute() {
-        System.exit(1);
+    public void execute(VirtualMachine vm) {
+        vm.setRunning(false);
     }
 
 }

@@ -1,16 +1,19 @@
 package interpreter.bytecode;
 
- public abstract class ByteCode {
+import interpreter.VirtualMachine;
 
-    int iarg;
+public abstract class ByteCode {
+
+    Integer iarg;
     String sarg;
+
 
      public void init(int arg){
          this.iarg = arg;
      }
 
 
-     public abstract void execute();
+     public abstract void execute(VirtualMachine vm);
 
 
 }

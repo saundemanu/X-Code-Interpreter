@@ -1,4 +1,10 @@
 package interpreter.bytecode;
 
-public class LitCode {
+import interpreter.VirtualMachine;
+
+public class LitCode extends MemOperationByteCode{
+    @Override
+    public void execute(VirtualMachine vm) {
+        vm.askRunStackPush(iarg);
+    }
 }

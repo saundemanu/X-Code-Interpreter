@@ -1,8 +1,11 @@
 package interpreter.bytecode;
 
-public class ArgsCode extends ByteCode {
-    @Override
-    public void execute() {
+import interpreter.VirtualMachine;
 
+public class ArgsCode extends ByteCode {
+
+    @Override
+    public void execute(VirtualMachine vm) {
+        vm.askNewFrame(iarg);
     }
 }
