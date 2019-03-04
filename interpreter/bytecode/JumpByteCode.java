@@ -1,12 +1,15 @@
 package interpreter.bytecode;
 
+import java.util.ArrayList;
+
 public abstract class JumpByteCode extends ByteCode {
 
-
     private int address;
+    private String label;
 
-    public void init(String label){
-        this.sarg = label;
+    @Override
+    public void init(ArrayList<String> args){
+            this.label = args.get(0);
     }
 
     public int getAddress() {
@@ -14,7 +17,7 @@ public abstract class JumpByteCode extends ByteCode {
     }
 
     public String getLabel() {
-        return sarg;
+        return label;
     }
 
     public void setAddress(int address) {

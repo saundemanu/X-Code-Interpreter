@@ -2,10 +2,14 @@ package interpreter.bytecode;
 
 import interpreter.VirtualMachine;
 
+import java.util.ArrayList;
+
 public class BopCode extends ByteCode{
 
-    public void init(String s){
-        this.sarg = s;
+    private String operation;
+
+    public void init(ArrayList<String> args){
+        this.operation = args.get(0);
     }
 
     @Override
@@ -13,7 +17,7 @@ public class BopCode extends ByteCode{
     Integer op2 = vm.askRunStackPop();
     Integer op1 = vm.askRunStackPop();
 
-    switch(sarg){
+    switch(this.operation){
         case "+":
             vm.askRunStackPush(op1+op2);
             break;

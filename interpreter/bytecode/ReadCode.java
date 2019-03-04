@@ -2,17 +2,23 @@ package interpreter.bytecode;
 
 import interpreter.VirtualMachine;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ReadCode extends ByteCode {
 
-    Scanner s;
+    private Scanner s;
+    private int read;
+
+    @Override
+    public void init(ArrayList<String> args) {
+        read = Integer.parseInt(args.get(0));
+    }
 
     @Override
     public void execute(VirtualMachine vm) {
-        Scanner s = new Scanner(System.in);
-        this.iarg = s.nextInt(); //Int only
-        vm.askRunStackPush(this.iarg);
-        s.close();
+        s = new Scanner(System.in);
+        this.read = s.nextInt(); //Int only
+        vm.askRunStackPush(this.read);
     }
 }
