@@ -1,16 +1,15 @@
 package interpreter;
 
-import interpreter.bytecode.ByteCode;
-import interpreter.bytecode.CallCode;
-import interpreter.bytecode.GotoCode;
-import interpreter.bytecode.ReturnCode;
+import interpreter.bytecode.*;
 
+
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class  VirtualMachine {
 
     private RunTimeStack runStack;
-    private Stack returnAddrs = new Stack<Integer>();
+    private Stack<Integer> returnAddrs;
     private Program program;
     private int pc;
     private boolean isRunning;
@@ -23,20 +22,29 @@ public class  VirtualMachine {
     protected void executeProgram() {
         this.setRunning(true);
         runStack = new RunTimeStack();
-        pc = 0;
-//        for(int i = 0; i < this.program.getSize(); i++){
-//            System.out.println(program.getCode(i).getClass());
-//        }
-
+        this.pc = 0;
+        returnAddrs = new Stack<>();
+        int pcBeforeExe;
         while (isRunning) {
-            ByteCode code = program.getCode(pc);
-           System.out.println(code.getClass());
-//           if(code instanceof CallCode) System.out.println(((CallCode) code).getLabel() + "|" + pc );
-           code.execute(this);
+            pcBeforeExe = pc;
+            ByteCode code = program.getCode(this.pc);
+            System.out.println(code.getClass());
+
+            code.execute(this);
             if(dump){
+                runStack.dump();
             }
-            pc++;
+            if(pc == pcBeforeExe) this.pc++;
         }
+    }
+
+    public void pushReturnStack(){
+        this.returnAddrs.push(this.pc + 1);
+    }
+
+    public int popReturnStack(){
+        if(returnAddrs.size() >= 1) return this.returnAddrs.pop();
+    throw new EmptyStackException();
     }
 
     public void setRunning(boolean isRunning) {
@@ -45,15 +53,6 @@ public class  VirtualMachine {
 
     public void setDump(boolean dump) {
         this.dump = dump;
-    }
-
-
-    public void pushReturnStack(){
-        this.returnAddrs.push(pc);
-    }
-
-    public int popReturnAddrs() {
-        return (int)returnAddrs.pop();
     }
 
     public void askRunStackPush(int newArg) {
@@ -70,7 +69,7 @@ public class  VirtualMachine {
         try {
            topOfStack = runStack.pop();
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error Popping Stack: " + e.getMessage());
         }
         return topOfStack;
     }
@@ -80,7 +79,7 @@ public class  VirtualMachine {
         try {
             topOfStack = runStack.peek();
         } catch (Exception e) {
-            System.out.println("Error" + e.getMessage());
+            System.out.println("Error Peeking Stack: " + e.getMessage());
         }
 
         return topOfStack;
@@ -103,7 +102,7 @@ public class  VirtualMachine {
         try {
             this.runStack.store(offset);
         }catch (Exception e){
-            System.out.println("Error:" + e.getMessage());
+            System.out.println("Error Storing:" + e.getMessage());
         }
     }
 }
