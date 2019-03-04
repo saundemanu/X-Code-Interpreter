@@ -31,15 +31,17 @@ public class Program {
 //     * @param program Program object that holds a list of ByteCodes
      */
     public void resolveAddrs() {
-        for(int i = 0;  i < this.getSize() - 1; i++){
-            if(program.get(i) instanceof JumpByteCode){
-                String label = ((JumpByteCode) program.get(i)).getLabel();
-            for(int j = 0; j < this.getSize(); i++){
-                if(program.get(j) instanceof LabelCode &&
-                         ((LabelCode) program.get(j)).getLabel().equals(label)){
-                        ((JumpByteCode) program.get(i)).setAddress(i);
+        for(int i = 0; i < getSize(); i++){
+            if(getCode(i) instanceof LabelCode){
+                ((LabelCode) getCode(i)).setAddress(i);
+            } else if(getCode(i) instanceof JumpByteCode){
+                for(int j = 0; j < getSize(); j++){
+                    if(i==j)continue;
+                    if(getCode(j) instanceof LabelCode &&
+                            ((LabelCode) getCode(j)).getLabel().equals(((JumpByteCode) getCode(i)).getLabel() )){
+                        ((JumpByteCode) getCode(i)).setAddress(j);
+                    }
                 }
-            }
             }
         }
     }
