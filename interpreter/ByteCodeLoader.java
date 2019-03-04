@@ -1,14 +1,12 @@
 
 package interpreter;
 
-import interpreter.bytecode.ByteCode;
-import interpreter.bytecode.JumpByteCode;
-import interpreter.bytecode.MemOperationByteCode;
-import interpreter.bytecode.BOPCode;
+import interpreter.bytecode.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 
@@ -35,40 +33,39 @@ public class ByteCodeLoader extends Object {
      * Parse any additional arguments for the given ByteCode and send them to
      * the newly created ByteCode instance via the init function.
      */
-    public Program loadCodes() throws Exception {
-        String line, code, label;
-        int argument;
+    public Program loadCodes() {
+        String line, code;
         Program newProgram = new Program();
+        ArrayList<String> args = new ArrayList<>();
 
-        while ((line = byteSource.readLine()) != null) {
+        try {
+            line = byteSource.readLine();
+            if (line == null) throw new IOException("File Empty!");
 
-            tokenizer = new StringTokenizer(line, " ");
-            code = tokenizer.nextToken();
-            String className = CodeTable.getClassName(code);
-            Class c = Class.forName("interpreter.bytecode." + className);
-            ByteCode bc = (ByteCode) c.getDeclaredConstructor().newInstance();
+            while (line != null) {
+                args.clear();
+                tokenizer = new StringTokenizer(line, " ");
+                code = tokenizer.nextToken();
+                String className = CodeTable.getClassName(code);
+                Class c = Class.forName("interpreter.bytecode." + className);
+                ByteCode bc = (ByteCode) c.getDeclaredConstructor().newInstance();
 
-            while (tokenizer.hasMoreElements()) {
-                if (bc instanceof BOPCode) {
-
-                } else if (bc instanceof JumpByteCode) {
-                    label = tokenizer.nextToken();
-                    ((JumpByteCode) bc).init(label);
-                } else if (bc instanceof MemOperationByteCode) {
-                    argument = (int) tokenizer.nextElement();
-                    if (tokenizer.hasMoreElements()) {
-                        label = tokenizer.nextToken();
-                        ((MemOperationByteCode) bc).init(argument, label);
-                    } else {
-                        bc.init(argument);
-                    }
-
+                while (tokenizer.hasMoreElements()) {
+                   args.add(tokenizer.nextToken());
                 }
-
-
+                if(!args.isEmpty()) {
+                    bc.init(args);
+                }
+                newProgram.addByteCode(bc);
+                line = byteSource.readLine();
             }
-            newProgram.addByteCode(bc);
+        }catch (Exception e){
+            System.out.println("Error loading: " + e.getMessage());
         }
-        return newProgram;
+            newProgram.resolveAddrs();
+
+            return newProgram;
+
     }
+
 }
