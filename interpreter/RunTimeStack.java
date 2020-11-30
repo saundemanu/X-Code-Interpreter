@@ -1,7 +1,6 @@
 package interpreter;
 
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class RunTimeStack {
@@ -17,38 +16,41 @@ public class RunTimeStack {
         framePointer.add(0);
     }
 
-    public Integer pop() throws Exception{
-        if(runTimeStack.size() <= 1)
-    return runTimeStack.remove(runTimeStack.size()-1);
-        else throw new EmptyStackException();
+    public Integer pop() {
+        return runTimeStack.remove(runTimeStack.size() - 1);
     }
 
-    public Integer push(Integer newArg) throws Exception{
-         runTimeStack.add(newArg);
-         return this.peek();
+    public Integer push(Integer newArg) {
+        runTimeStack.add(newArg);
+        return this.peek();
     }
 
-    public void dump(){
+    public void dump() {
 
+        for (int i = 0; i < framePointer.size(); i++) {
+            if (i + 1 < framePointer.size())
+                System.out.print(runTimeStack.subList(framePointer.get(i), framePointer.get(i + 1)));
+            else {
+                System.out.print(runTimeStack.subList(framePointer.get(i), runTimeStack.size()));
+            }
+        }
+        System.out.print("\n");
     }
 
-    public Integer peek() throws Exception{
-        if(runTimeStack.size() <= 1)
+    public Integer peek() {
             return runTimeStack.get(runTimeStack.size() - 1);
-        else throw new EmptyStackException();
+
     }
 
-   
+
 
     public void popFrame(){
-    Integer index = runTimeStack.size()-1;
-    while(index <= this.getFrameStart()){
-        runTimeStack.remove(index);
-    }
-    framePointer.pop();
+        if (runTimeStack.size() > 0)
+            runTimeStack.subList(framePointer.peek(), runTimeStack.size()).clear();
+        framePointer.pop();
     }
 
-    public Integer store(int offset)throws Exception{
+    public Integer store(int offset) {
             Integer currentFrame = getFrameStart();
             Integer value = this.pop();
             runTimeStack.add(currentFrame + offset, value);
@@ -56,26 +58,37 @@ public class RunTimeStack {
     }
 
     public void load(int offset){
-    Integer currentFrame = this.getFrameStart();
-    Integer temp = runTimeStack.get(currentFrame + offset);
-    Integer topOfStack =  runTimeStack.get(runTimeStack.size() - 1);
-    runTimeStack.set(currentFrame + offset, topOfStack);
-    runTimeStack.set(runTimeStack.size()-1, temp);
-
+        int currentFrame = this.getFrameStart();
+        int add = runTimeStack.get(offset + currentFrame);
+        this.push(add);
     }
 
-
+    public String peekFrame() {
+        StringBuilder s = new StringBuilder();
+        for (int i = framePointer.peek(); i < runTimeStack.size() - 1; i++) {
+            s.append(runTimeStack.get(i));
+            s.append(",");
+        }
+        if (runTimeStack.size() > 0)
+            s.append(runTimeStack.get(runTimeStack.size() - 1));
+        return s.toString();
+    }
 
     public void newFrameAt(int offset){
-        if(runTimeStack.size() <= offset)
-            framePointer.push(runTimeStack.size() - offset);
-        else throw new EmptyStackException();
-}
+        int index;
+        if (runTimeStack.size() < 1) {
+            index = 0;
+        } else index = ((runTimeStack.size()) - offset);
+        framePointer.push(index);
+    }
 
     public Integer getFrameStart(){
     return this.framePointer.peek();
     }
 
+    public int size() {
+        return runTimeStack.size();
+    }
 }
 
 

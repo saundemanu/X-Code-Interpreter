@@ -3,7 +3,6 @@ package interpreter;
 import interpreter.bytecode.*;
 
 
-import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class  VirtualMachine {
@@ -11,7 +10,7 @@ public class  VirtualMachine {
     private RunTimeStack runStack;
     private Stack<Integer> returnAddrs;
     private Program program;
-    private int pc;
+    private int programCounter;
     private boolean isRunning;
     private boolean dump;
 
@@ -22,29 +21,34 @@ public class  VirtualMachine {
     protected void executeProgram() {
         this.setRunning(true);
         runStack = new RunTimeStack();
-        this.pc = 0;
+        this.programCounter = 0;
         returnAddrs = new Stack<>();
         int pcBeforeExe;
+
         while (isRunning) {
-            pcBeforeExe = pc;
-            ByteCode code = program.getCode(this.pc);
-            System.out.println(code.getClass());
+            pcBeforeExe = programCounter;
+            ByteCode code = program.getCode(this.programCounter);
 
             code.execute(this);
-            if(dump){
+
+            if (dump && !(code instanceof DumpCode)) {
+                System.out.println(code);
                 runStack.dump();
             }
-            if(pc == pcBeforeExe) this.pc++;
+            if (programCounter == pcBeforeExe) this.programCounter++;
         }
     }
 
+    public String argsAsString() {
+        return this.runStack.peekFrame();
+    }
+
     public void pushReturnStack(){
-        this.returnAddrs.push(this.pc + 1);
+        this.returnAddrs.push(this.programCounter + 1);
     }
 
     public int popReturnStack(){
-        if(returnAddrs.size() >= 1) return this.returnAddrs.pop();
-    throw new EmptyStackException();
+        return this.returnAddrs.pop();
     }
 
     public void setRunning(boolean isRunning) {
@@ -56,42 +60,34 @@ public class  VirtualMachine {
     }
 
     public void askRunStackPush(int newArg) {
-      try {
           this.runStack.push(newArg);
       }
-      catch (Exception e){
-          System.out.println(e.getMessage());
-      }
-    }
 
     public int askRunStackPop() {
-        int topOfStack = -999;
-        try {
-           topOfStack = runStack.pop();
-        } catch (Exception e) {
-            System.out.println("Error Popping Stack: " + e.getMessage());
-        }
-        return topOfStack;
+        return runStack.pop();
     }
 
     public int askRunStackPeek() {
-        int topOfStack = -999;
-        try {
-            topOfStack = runStack.peek();
-        } catch (Exception e) {
-            System.out.println("Error Peeking Stack: " + e.getMessage());
-        }
-
-        return topOfStack;
+        return runStack.peek();
     }
+
     public void askNewFrame(int offset){
         runStack.newFrameAt(offset);
     }
 
-    public void askPopFrame(){ runStack.popFrame();}
+    public void askPopFrame() {
+        if (runStack.size() - 1 < runStack.getFrameStart()) {
+            runStack.popFrame();
+            return;
+        }
+        Integer i = this.askRunStackPop();
+        this.runStack.popFrame();
+        this.runStack.push(i);
+    }
+
 
     public void jump(int address){
-        this.pc = address;
+        this.programCounter = address;
     }
 
     public void askRunStackLoad(int offset){
@@ -99,10 +95,11 @@ public class  VirtualMachine {
     }
 
     public void askRunStackStore(int offset){
-        try {
             this.runStack.store(offset);
-        }catch (Exception e){
-            System.out.println("Error Storing:" + e.getMessage());
-        }
+    }
+
+    public void vmReturn() {
+        this.askPopFrame();
+        this.jump(this.popReturnStack());
     }
 }
